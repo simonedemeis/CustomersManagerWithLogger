@@ -1,4 +1,5 @@
 ﻿using CustomersManager.Data;
+using CustomersManager.DTOs.Customer;
 using CustomersManager.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,11 +55,21 @@ namespace CustomersManager.Services
             }
         }
 
-        public async Task<Customer?> GetCustomerByIdAsync(int id)
+        public async Task<CustomerDto?> GetCustomerByIdAsync(int id)
         {
             try
             {
-                return await _context.Customers.FirstOrDefaultAsync(c => c.Id == id);
+                var existingCustomer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == id);
+
+                var customerDto = new CustomerDto()
+                {
+                    Id = existingCustomer.Id,
+                    FirstName = existingCustomer.FirstName,
+                    LastName = existingCustomer.LastName,
+                    EmailAddress = existingCustomer.EmailAddress
+                };
+
+                return customerDto;
             }
             catch (Exception ex)
             {
@@ -67,27 +78,28 @@ namespace CustomersManager.Services
             }
         }
 
-        public async Task<bool> DeleteCustomerAsync(int id)
-        {
-            try
-            {
-                var existingCustomer = await GetCustomerByIdAsync(id);
+        //public async Task<bool> DeleteCustomerAsync(int id)
+        //{
+        //    try
+        //    {
+        //        var existingCustomer = await GetCustomerByIdAsync(id);
 
-                if(existingCustomer == null)
-                {
-                    return false;
-                }
 
-                _context.Customers.Remove(existingCustomer);
+        //        if (existingCustomer == null)
+        //        {
+        //            return false;
+        //        }
 
-                return await SaveAsync();
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return false;
-            }
-        }
+        //        _context.Customers.Remove(existingCustomer);
+
+        //        return await SaveAsync();
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        _logger.LogError(ex, ex.Message);
+        //        return false;
+        //    }
+        //}
 
         public async Task<bool> UpdateCustomerAsync(int id, Customer customer)
         {

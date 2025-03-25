@@ -3,6 +3,7 @@ using CustomersManager.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using CustomersManager.DTOs.Customer;
 
 namespace CustomersManager.Controllers
 {
@@ -20,11 +21,25 @@ namespace CustomersManager.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Customer customer)
+        public async Task<IActionResult> Create([FromBody] CreateCustomerRequestDto createCustomerRequestDto)
         {
-            var result = await _customerService.CreateCustomerAsync(customer);
+            try
+            {
+                var newCustomer = new Customer()
+                {
+                    FirstName = createCustomerRequestDto.FirstName,
+                    LastName = createCustomerRequestDto.LastName,
+                    EmailAddress = createCustomerRequestDto.EmailAddress,
+                };
 
-            return result ? Ok(new {message = "Customer created"}) : BadRequest(new {message = "Something went wrong"});
+                var result = await _customerService.CreateCustomerAsync(newCustomer);
+
+                return result ? Ok(new CreateCustomerResponseDto() { Message = "Customer created!" }) : BadRequest(new CreateCustomerResponseDto() { Message = "Something went wrong!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet]
@@ -45,13 +60,13 @@ namespace CustomersManager.Controllers
             return result != null ? Ok(new { message = "Customer found", customer = result }) : BadRequest(new { message = "Something went wrong" });
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await _customerService.DeleteCustomerAsync(id);
+        //[HttpDelete("{id:int}")]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    var result = await _customerService.DeleteCustomerAsync(id);
 
-            return result ? Ok(new { message = "Customer deleted" }) : BadRequest(new { message = "Something went wrong" });
-        }
+        //    return result ? Ok(new { message = "Customer deleted" }) : BadRequest(new { message = "Something went wrong" });
+        //}
 
         [HttpPut]
         public async Task<IActionResult> Update([FromQuery]int id ,[FromBody]Customer customer)
