@@ -48,6 +48,17 @@ try
 
     app.MapControllers();
 
+    app.MapGet("/customers", async (string demo, ApplicationDbContext context) =>
+    {
+        var result = await context.Customers.ToListAsync();
+
+        return Results.Ok(new
+        {
+            message = "success!",
+            customers = result
+        });
+    });
+
     app.Run();
 }
 catch (Exception ex)
